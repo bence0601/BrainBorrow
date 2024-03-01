@@ -1,0 +1,6 @@
+@BrainBorrowAPI_HostAddress = http://localhost:5293
+
+GET {{BrainBorrowAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
