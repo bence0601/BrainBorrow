@@ -1,0 +1,37 @@
+version: '3.4'
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+  brainborrowapi:
+    image: ${DOCKER_REGISTRY-}brainborrowapi
+    build:
+      context: .
+      dockerfile: BrainBorrowAPI/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+    - ASPNETCORE_URLS=http://+:80
+    networks:
+    - dev
+
+  db:
+    image: postgres
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=xV5m1X6@J@b?
+    - POSTGRES_DB=BrainBorrowDb
+    ports:
+    - "5432:5432" 
+    volumes:
+    - PgData:/var/lib/postgresql/data
+    networks:
+     - dev 
+     
+volumes:
+  PgData:
+
+
+
