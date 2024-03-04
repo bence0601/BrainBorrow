@@ -4,107 +4,51 @@ using BrainBorrowAPI.Services.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+// Add DbContexts
 builder.Services.AddDbContext<NoteContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-    });
+    ConfigureDbContext(options, builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 builder.Services.AddDbContext<UserContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-    });
+    ConfigureDbContext(options, builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// Configure Identity
+builder.Services.AddIdentityCore<IdentityUser>(options =>
+{
+    ConfigureIdentityOptions(options);
+})
+.AddEntityFrameworkStores<UserContext>();
+
+// Configure authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.IncludeErrorDetails = true;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "apiWithAuthBackend",
-            ValidAudience = "apiWithAuthBackend",
+        ConfigureJwtBearerOptions(options);
+    });
 
-            // Use the helper method to ensure a 32-byte key
-            IssuerSigningKey = new SymmetricSecurityKey(
-                PadKey(Encoding.UTF8.GetBytes("!SomethingSecret!"), 32)
-            ),
-        };
-    });
-builder.Services.AddSwaggerGen(option =>
+// Configure Swagger
+builder.Services.AddSwaggerGen(options =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
+    ConfigureSwagger(options);
 });
-byte[] PadKey(byte[] key, int length) //padding the secretkey with 0 bytes if it's not long enough
-{
-    if (key.Length >= length)
-    {
-        return key;
-    }
-
-    byte[] paddedKey = new byte[length];
-    Array.Copy(key, paddedKey, key.Length);
-    return paddedKey;
-}
-builder.Services
-    .AddIdentityCore<IdentityUser>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = false;
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-    })
-    .AddEntityFrameworkStores<UserContext>();
 
 var app = builder.Build();
 
@@ -116,13 +60,83 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
-
-
-
 app.MapControllers();
-
 app.Run();
+
+// Helper methods
+void ConfigureDbContext(DbContextOptionsBuilder options, string connectionString)
+{
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+    });
+}
+
+void ConfigureIdentityOptions(IdentityOptions options)
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+}
+
+void ConfigureJwtBearerOptions(JwtBearerOptions options)
+{
+    options.IncludeErrorDetails = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ClockSkew = TimeSpan.Zero,
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "apiWithAuthBackend",
+        ValidAudience = "apiWithAuthBackend",
+        IssuerSigningKey = new SymmetricSecurityKey(PadKey(Encoding.UTF8.GetBytes("!SomethingSecret!"), 32))
+    };
+}
+
+void ConfigureSwagger(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions options)
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+}
+
+byte[] PadKey(byte[] key, int length)
+{
+    if (key.Length >= length)
+    {
+        return key;
+    }
+
+    byte[] paddedKey = new byte[length];
+    Array.Copy(key, paddedKey, key.Length);
+    return paddedKey;
+}
