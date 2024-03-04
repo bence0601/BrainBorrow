@@ -1,5 +1,6 @@
 ﻿using BrainBorrowAPI.Models;
 using BrainBorrowAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BrainBorrowAPI.Controllers
@@ -41,7 +42,7 @@ namespace BrainBorrowAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("DeleteNoteById")]
+        [HttpGet("DeleteNoteById"), Authorize]
         public async Task<ActionResult<List<NoteModel>>> DeleteNoteById(int id)
         {
             var result = await _NoteService.DeleteModelById(id);
