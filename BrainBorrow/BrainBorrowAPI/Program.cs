@@ -1,6 +1,9 @@
 using BrainBorrowAPI.Data;
 using BrainBorrowAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +23,38 @@ builder.Services.AddDbContext<NoteContext>(options =>
     });
 });
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.IncludeErrorDetails = true;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ClockSkew = TimeSpan.Zero,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "apiWithAuthBackend",
+            ValidAudience = "apiWithAuthBackend",
+
+            // Use the helper method to ensure a 32-byte key
+            IssuerSigningKey = new SymmetricSecurityKey(
+                PadKey(Encoding.UTF8.GetBytes("!SomethingSecret!"), 32)
+            ),
+        };
+    });
+byte[] PadKey(byte[] key, int length) //padding the secretkey with 0 bytes if it's not long enough
+{
+    if (key.Length >= length)
+    {
+        return key;
+    }
+
+    byte[] paddedKey = new byte[length];
+    Array.Copy(key, paddedKey, key.Length);
+    return paddedKey;
+}
 
 var app = builder.Build();
 
