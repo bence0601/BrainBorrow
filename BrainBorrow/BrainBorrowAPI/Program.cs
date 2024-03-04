@@ -1,6 +1,7 @@
 using BrainBorrowAPI.Data;
 using BrainBorrowAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -62,6 +63,18 @@ byte[] PadKey(byte[] key, int length) //padding the secretkey with 0 bytes if it
     Array.Copy(key, paddedKey, key.Length);
     return paddedKey;
 }
+builder.Services
+    .AddIdentityCore<IdentityUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+    })
+    .AddEntityFrameworkStores<UserContext>();
 
 var app = builder.Build();
 
