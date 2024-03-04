@@ -16,8 +16,8 @@ namespace BrainBorrowAPI.Controllers
         }
 
 
-        [HttpPost("Register")]
-        public async Task<ActionResult<List<NoteModel>>> Register(NoteModel model)
+        [HttpPost("Register"), Authorize]
+        public async Task<ActionResult<List<NoteModel>>> AddNote(NoteModel model)
         {
             if (!ModelState.IsValid)
             {
