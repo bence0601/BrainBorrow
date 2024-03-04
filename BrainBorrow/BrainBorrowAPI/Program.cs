@@ -22,6 +22,13 @@ builder.Services.AddDbContext<NoteContext>(options =>
         npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
     });
 });
+builder.Services.AddDbContext<UserContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+    });
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
