@@ -27,6 +27,27 @@ namespace BrainBorrowAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetNoteById")]
+        public async Task<ActionResult<NoteModel>> GetSinlgeNoteById(int id)
+        {
+            var result = await _NoteService.FindNoteById(id);
+            return Ok(result);
+        }
+
+        [HttpGet("GetAllNotes")]
+        public async Task<ActionResult<List<NoteModel>>> GetAllNotes()
+        {
+            var result = await _NoteService.GetAllNotes();
+            return Ok(result);
+        }
+
+        [HttpGet("DeleteNoteById")]
+        public async Task<ActionResult<List<NoteModel>>> DeleteNoteById(int id)
+        {
+            var result = await _NoteService.DeleteModelById(id);
+            return Ok(result);
+        }
+
 
     }
 }
