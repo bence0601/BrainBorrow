@@ -2,6 +2,9 @@
 using BrainBorrowAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BrainBorrowAPI.Controllers
 {
@@ -9,47 +12,88 @@ namespace BrainBorrowAPI.Controllers
     [Route("[controller]")]
     public class NoteController : ControllerBase
     {
-        public INoteService _NoteService;
-        public NoteController(INoteService notesService)
+        private readonly INoteService _noteService;
+
+        public NoteController(INoteService noteService)
         {
-            _NoteService = notesService;
+            _noteService = noteService ?? throw new ArgumentNullException(nameof(noteService));
         }
 
-
-        [HttpPost("Register"), Authorize]
+        [HttpPost("Register")]
+        [Authorize]
         public async Task<ActionResult<List<NoteModel>>> AddNote(NoteModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            var result = await _NoteService.CreateNoteAsync(model);
-            return Ok(result);
+                var result = await _noteService.CreateNoteAsync(model);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception, log it, and possibly notify administrators
+                return StatusCode(500, $"An error occurred while adding the note: {ex.Message}");
+            }
         }
 
         [HttpGet("GetNoteById")]
-        public async Task<ActionResult<NoteModel>> GetSinlgeNoteById(int id)
+        public async Task<ActionResult<NoteModel>> GetSingleNoteById(int id)
         {
-            var result = await _NoteService.FindNoteById(id);
-            return Ok(result);
+            try
+            {
+                var result = await _noteService.FindNoteById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception, log it, and possibly notify administrators
+                return StatusCode(500, $"An error occurred while retrieving the note: {ex.Message}");
+            }
         }
 
         [HttpGet("GetAllNotes")]
         public async Task<ActionResult<List<NoteModel>>> GetAllNotes()
         {
-            var result = await _NoteService.GetAllNotes();
-            return Ok(result);
+            try
+            {
+                var result = await _noteService.GetAllNotes();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception, log it, and possibly notify administrators
+                return StatusCode(500, $"An error occurred while retrieving all notes: {ex.Message}");
+            }
         }
 
-        [HttpGet("DeleteNoteById"), Authorize]
+        [HttpGet("DeleteNoteById")]
+        [Authorize]
         public async Task<ActionResult<List<NoteModel>>> DeleteNoteById(int id)
         {
-            var result = await _NoteService.DeleteModelById(id);
-            return Ok(result);
+            try
+            {
+                var result = await _noteService.DeleteModelById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception, log it, and possibly notify administrators
+                return StatusCode(500, $"An error occurred while deleting the note: {ex.Message}");
+            }
         }
-
-
     }
 }
-

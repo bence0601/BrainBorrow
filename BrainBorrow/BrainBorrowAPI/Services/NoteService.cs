@@ -1,48 +1,82 @@
 ﻿using BrainBorrowAPI.Data;
 using BrainBorrowAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BrainBorrowAPI.Services
 {
     public class NotesService : INoteService
     {
         private readonly NoteContext _noteContext;
+
         public NotesService(NoteContext noteDataContext)
         {
-            _noteContext = noteDataContext;
+            _noteContext = noteDataContext ?? throw new ArgumentNullException(nameof(noteDataContext));
         }
+
         public async Task<List<NoteModel>> CreateNoteAsync(NoteModel model)
         {
-            _noteContext.Add(model);
-            await _noteContext.SaveChangesAsync();
-            return await _noteContext.Notes.ToListAsync();
+            try
+            {
+                _noteContext.Add(model);
+                await _noteContext.SaveChangesAsync();
+                return await _noteContext.Notes.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                
+                throw new Exception("An error occurred while creating a note.", ex);
+            }
         }
 
         public async Task<NoteModel> FindNoteById(int id)
         {
-            var NoteToReturn = await _noteContext.Notes.FindAsync(id);
-            return NoteToReturn;
+            try
+            {
+                var noteToReturn = await _noteContext.Notes.FindAsync(id);
+                return noteToReturn;
+            }
+            catch (Exception ex)
+            {
+                
+                throw new Exception($"An error occurred while finding a note with ID {id}.", ex);
+            }
         }
 
-        public Task<List<NoteModel>> GetAllNotes()
+        public async Task<List<NoteModel>> GetAllNotes()
         {
-            return _noteContext.Notes.ToListAsync();
+            try
+            {
+                return await _noteContext.Notes.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                
+                throw new Exception("An error occurred while retrieving all notes.", ex);
+            }
         }
 
         public async Task<List<NoteModel>> DeleteModelById(int id)
         {
-            var NoteToDelete = await _noteContext.Notes.FirstOrDefaultAsync(p => p.Id == id);
-
-            if (NoteToDelete != null)
+            try
             {
-               _noteContext.Notes.Remove(NoteToDelete);
-                await _noteContext.SaveChangesAsync();
+                var noteToDelete = await _noteContext.Notes.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (noteToDelete != null)
+                {
+                    _noteContext.Notes.Remove(noteToDelete);
+                    await _noteContext.SaveChangesAsync();
+                }
+
+                return await _noteContext.Notes.ToListAsync();
             }
-
-            return await _noteContext.Notes.ToListAsync();
-
+            catch (Exception ex)
+            {
+                
+                throw new Exception($"An error occurred while deleting a note with ID {id}.", ex);
+            }
         }
-
-        
     }
 }
