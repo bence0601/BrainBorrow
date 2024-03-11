@@ -15,9 +15,19 @@ COPY . .
 WORKDIR "/src/BrainBorrowAPI"
 RUN dotnet build "./BrainBorrowAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Add test project
+COPY ["BrainBorrowApiTest/BrainBorrowApiTest.csproj", "BrainBorrowApiTest/"]
+RUN dotnet restore "./BrainBorrowApiTest/BrainBorrowApiTest.csproj"
+COPY . .
+WORKDIR "/src/BrainBorrowApiTest"
+RUN dotnet build "./BrainBorrowApiTest.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./BrainBorrowAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Add test project publish
+RUN dotnet publish "./BrainBorrowApiTest.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 FROM base AS final
 WORKDIR /app

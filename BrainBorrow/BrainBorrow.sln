@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrainBorrowAPI", "BrainBorr
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{7382D261-D852-4F1E-A537-A2415EE9AFB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrainBorrowApiTest", "BrainBorrowApiTest\BrainBorrowApiTest.csproj", "{2E8E4C8D-5C5D-4E8F-88E3-EE256C98DD58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrainBorrowApiTest", "BrainBorrowApiTest\BrainBorrowApiTest.csproj", "{28CEFD32-2B25-4346-953D-271CA77F3AD3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{7382D261-D852-4F1E-A537-A2415EE9AFB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7382D261-D852-4F1E-A537-A2415EE9AFB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7382D261-D852-4F1E-A537-A2415EE9AFB6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E8E4C8D-5C5D-4E8F-88E3-EE256C98DD58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E8E4C8D-5C5D-4E8F-88E3-EE256C98DD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E8E4C8D-5C5D-4E8F-88E3-EE256C98DD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E8E4C8D-5C5D-4E8F-88E3-EE256C98DD58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28CEFD32-2B25-4346-953D-271CA77F3AD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28CEFD32-2B25-4346-953D-271CA77F3AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28CEFD32-2B25-4346-953D-271CA77F3AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28CEFD32-2B25-4346-953D-271CA77F3AD3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
