@@ -62,7 +62,7 @@ namespace BrainBorrowAPI.Services
         {
             try
             {
-                var noteToDelete = await _noteContext.Notes.FirstOrDefaultAsync(p => p.Id == id);
+                var noteToDelete = await _noteContext.Notes.FindAsync(id);
 
                 if (noteToDelete != null)
                 {
